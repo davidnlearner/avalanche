@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { useRef, useEffect, useState } from "react";
+import Phaser from "phaser";
+
+import { initGame } from "./game.js";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const gameWindow = useRef(null);
+
+    const [height, setHeight] = useState(600);
+    const [width, setWidth] = useState(800);
+    const [game, setGame] = useState(null);
+
+    useEffect(() => {
+        setGame(initGame({ gameWindow, height, width }));
+
+        window.addEventListener("resize", () => {
+            setHeight(window.innerHeight);
+            setWidth(window.innerWidth);
+        });
+    }, []);
+
+    /*
+    useEffect(() => {
+        if (game) {
+            console.log("running ", game);
+            game.scale.resize(width, height);
+        }
+    }, [height, width]);
+    */
+
+    return (
+        <div className="App">
+            <canvas ref={gameWindow}></canvas>
+        </div>
+    );
 }
 
 export default App;
