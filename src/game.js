@@ -26,19 +26,19 @@ export const initGame = ({ gameWindow, height, width }) => {
 
 var player;
 var stars;
-var bombs;
 var platforms;
 var cursors;
-var score = 0;
 var gameStart = false;
 var gameOver = false;
 var scoreText;
+let score = 0;
+let spawnTimer = 0;
 
 function preload() {
     this.load.image("sky", "assets/sky.png");
     this.load.image("ground", "assets/platform.png");
     this.load.image("star", "assets/star.png");
-    this.load.image("bomb", "assets/bomb.png");
+    this.load.image("crate", "assets/crate.png");
     this.load.spritesheet("dude", "assets/dude.png", {
         frameWidth: 32,
         frameHeight: 48,
@@ -46,6 +46,8 @@ function preload() {
 }
 
 function create() {
+    this.physics.world.setBounds(0, 0, 800, 600);
+
     this.cameras.main
         .setViewport(0, 0, 800, 600)
         .setBounds(0, 0, 800, 6000)
@@ -65,7 +67,8 @@ function create() {
     //  Now let's create some ledges
     platforms.create(600, 400, "ground");
     platforms.create(50, 250, "ground");
-    platforms.create(750, 220, "ground");
+    //platforms.create(750, 220, "ground");
+    platforms.create(750, 220, "crate").setScale(0.2);
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, "dude");
@@ -117,22 +120,39 @@ function create() {
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
-    this.physics.add.collider(bombs, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
 }
 
 function update() {
-    if (player.body.bottom >= this.cameras.main.height - this.cameras.main.y) {
-        console.log(this.cameras.main.height - this.cameras.main.y);
+    // Need to fix this the 10 + is a stop gap until delay camera move
+    if (
+        player.body.bottom >=
+        10 + this.cameras.main.height - this.cameras.main.y
+    ) {
+        console.log(
+            this.cameras.main.height -
+                this.cameras.main.y +
+                " player: " +
+                player.body.bottom
+        );
         playerGameOver();
+    }
+
+    if (spawnTimer === 500) {
+        spawnTimer = 0;
+        spawnCrate(this.cameras.main);
+    } else {
+        spawnTimer += 1;
     }
 
     if (gameOver) {
         return;
     } else {
-        this.cameras.main.y += 0.1;
+        let screenBottom = this.cameras.main.y + 0.1;
+        this.cameras.main.y = screenBottom;
+        this.physics.world.setBounds(0, -screenBottom, 800, 600);
     }
 
     if (cursors.left.isDown) {
@@ -148,7 +168,6 @@ function update() {
 
         player.anims.play("turn");
     }
-
     if (cursors.up.isDown && player.body.touching.down) {
         player.setVelocityY(-330);
     }
@@ -174,10 +193,16 @@ function collectStar(player, star) {
     }
 }
 
+function spawnCrate(camera) {
+    // will need to give gravity and random scaling
+    // need to reduce max x value by box size (post scaling)
+    platforms
+        .create(Phaser.Math.Between(0, 800), camera.y, "crate")
+        .setScale(0.2);
+}
+
 function playerGameOver() {
     console.log("game over");
-    this.physics.pause();
-
     gameOver = true;
     alert("You lost, game over!");
 }
