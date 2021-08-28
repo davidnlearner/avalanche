@@ -27,6 +27,7 @@ export const initGame = ({ gameWindow, height, width }) => {
 var player;
 var stars;
 var platforms;
+let crates;
 var cursors;
 var gameStart = false;
 var gameOver = false;
@@ -46,7 +47,7 @@ function preload() {
 }
 
 function create() {
-    this.physics.world.setBounds(0, 0, 800, 600);
+    this.physics.world.setBounds(0, 20, 800, 800);
 
     this.cameras.main
         .setViewport(0, 0, 800, 600)
@@ -67,8 +68,9 @@ function create() {
     //  Now let's create some ledges
     platforms.create(600, 400, "ground");
     platforms.create(50, 250, "ground");
-    //platforms.create(750, 220, "ground");
-    platforms.create(750, 220, "crate").setScale(0.2);
+
+    crates = this.physics.add.group();
+    crates.create(750, 220, "crate").setScale(0.2);
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, "dude");
@@ -120,27 +122,26 @@ function create() {
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(crates, platforms);
+
+    //crates need setPushable(false) https://newdocs.phaser.io/docs/3.55.2/Phaser.Physics.Arcade.Sprite#setPushable
+    this.physics.add.collider(player, crates);
+    // crates still overlap
+    this.physics.add.collider(crates, crates);
+
+    //this.physics.add.collider(crates, crates, lockCrate(crates));
+    //this.physics.add.collider(crates, platforms, lockCrate(crates));
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
 }
 
 function update() {
-    // Need to fix this the 10 + is a stop gap until delay camera move
-    if (
-        player.body.bottom >=
-        10 + this.cameras.main.height - this.cameras.main.y
-    ) {
-        console.log(
-            this.cameras.main.height -
-                this.cameras.main.y +
-                " player: " +
-                player.body.bottom
-        );
+    if (player.body.bottom >= this.cameras.main.height - this.cameras.main.y) {
         playerGameOver();
     }
 
-    if (spawnTimer === 500) {
+    if (spawnTimer === 250) {
         spawnTimer = 0;
         spawnCrate(this.cameras.main);
     } else {
@@ -152,7 +153,7 @@ function update() {
     } else {
         let screenBottom = this.cameras.main.y + 0.1;
         this.cameras.main.y = screenBottom;
-        this.physics.world.setBounds(0, -screenBottom, 800, 600);
+        this.physics.world.setBounds(0, -screenBottom, 800, 800);
     }
 
     if (cursors.left.isDown) {
@@ -196,9 +197,11 @@ function collectStar(player, star) {
 function spawnCrate(camera) {
     // will need to give gravity and random scaling
     // need to reduce max x value by box size (post scaling)
-    platforms
-        .create(Phaser.Math.Between(0, 800), camera.y, "crate")
-        .setScale(0.2);
+    crates.create(Phaser.Math.Between(0, 800), camera.y, "crate").setScale(0.2);
+}
+
+function lockCrate(crate) {
+    //crate.physics.setImmovable();
 }
 
 function playerGameOver() {
