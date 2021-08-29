@@ -56,7 +56,6 @@ function create() {
 
     //  A simple background for our game
     this.add.image(400, 300, "sky");
-    this.add.image(400, 900, "sky");
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = this.physics.add.staticGroup();
@@ -66,11 +65,10 @@ function create() {
     platforms.create(400, 568, "ground").setScale(2).refreshBody();
 
     //  Now let's create some ledges
-    platforms.create(600, 400, "ground");
-    platforms.create(50, 250, "ground");
+    //platforms.create(600, 400, "ground");
+    //platforms.create(50, 250, "ground");
 
     crates = this.physics.add.group();
-    crates.create(750, 220, "crate").setScale(0.2);
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, "dude");
@@ -139,21 +137,18 @@ function create() {
 function update() {
     if (player.body.bottom >= this.cameras.main.height - this.cameras.main.y) {
         playerGameOver();
-    }
-
-    if (spawnTimer === 250) {
-        spawnTimer = 0;
-        spawnCrate(this.cameras.main);
-    } else {
-        spawnTimer += 1;
-    }
-
-    if (gameOver) {
         return;
     } else {
-        let screenBottom = this.cameras.main.y + 0.1;
-        this.cameras.main.y = screenBottom;
-        this.physics.world.setBounds(0, -screenBottom, 800, 800);
+        let screenY = this.cameras.main.y + 0.1;
+        this.cameras.main.y = screenY;
+        this.physics.world.setBounds(0, -screenY, 800, 800);
+
+        if (spawnTimer === 200) {
+            spawnTimer = 0;
+            spawnCrate(-screenY);
+        } else {
+            spawnTimer += 1;
+        }
     }
 
     if (cursors.left.isDown) {
@@ -194,14 +189,21 @@ function collectStar(player, star) {
     }
 }
 
-function spawnCrate(camera) {
+function spawnCrate(screenY) {
     // will need to give gravity and random scaling
     // need to reduce max x value by box size (post scaling)
-    crates.create(Phaser.Math.Between(0, 800), camera.y, "crate").setScale(0.2);
-}
+    //base width is 512
+    const scale = Phaser.Math.FloatBetween(0.1, 0.4);
+    const crateWidth = 512 * scale;
 
-function lockCrate(crate) {
-    //crate.physics.setImmovable();
+    crates
+        .create(
+            Phaser.Math.Between(crateWidth / 2, 800 - crateWidth / 2),
+            screenY,
+            "crate"
+        )
+        .setScale()
+        .setPushable(false);
 }
 
 function playerGameOver() {
