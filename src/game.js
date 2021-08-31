@@ -34,6 +34,7 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
+let screenY = 0;
 
 function preload() {
     this.load.image("sky", "assets/sky.png");
@@ -47,11 +48,11 @@ function preload() {
 }
 
 function create() {
-    this.physics.world.setBounds(0, 20, 800, 800);
+    this.physics.world.setBounds(0, -1000, 800, 1600);
 
     this.cameras.main
         .setViewport(0, 0, 800, 600)
-        .setBounds(0, 0, 800, 6000)
+        .setBounds(0, 0, 800, 6400)
         .setName("main");
 
     //  A simple background for our game
@@ -62,7 +63,7 @@ function create() {
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 568, "ground").setScale(2).refreshBody();
+    platforms.create(400, 550, "ground").setScale(2).refreshBody();
 
     //  Now let's create some ledges
     //platforms.create(600, 400, "ground");
@@ -122,16 +123,14 @@ function create() {
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(crates, platforms);
 
-    //crates need setPushable(false) https://newdocs.phaser.io/docs/3.55.2/Phaser.Physics.Arcade.Sprite#setPushable
     this.physics.add.collider(player, crates);
-    // crates still overlap
     this.physics.add.collider(crates, crates);
-
-    //this.physics.add.collider(crates, crates, lockCrate(crates));
-    //this.physics.add.collider(crates, platforms, lockCrate(crates));
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
+
+    this.cameras.main.startFollow(player);
+    console.log(this.physics.world);
 }
 
 function update() {
@@ -139,9 +138,9 @@ function update() {
         playerGameOver();
         return;
     } else {
-        let screenY = this.cameras.main.y + 0.1;
-        this.cameras.main.y = screenY;
-        this.physics.world.setBounds(0, -screenY, 800, 800);
+        screenY += 0.1;
+        //this.cameras.main.y = screenY;
+        //this.physics.world.setBounds(0, -screenY, 800, 800);
 
         if (spawnTimer === 200) {
             spawnTimer = 0;
@@ -202,7 +201,7 @@ function spawnCrate(screenY) {
             screenY,
             "crate"
         )
-        .setScale()
+        .setScale(scale)
         .setPushable(false);
 }
 

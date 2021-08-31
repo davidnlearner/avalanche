@@ -6,7 +6,7 @@ import { initGame } from "./game.js";
 function App() {
     const gameWindow = useRef(null);
 
-    const [height, setHeight] = useState(600);
+    const [height, setHeight] = useState(6400);
     const [width, setWidth] = useState(800);
     const [game, setGame] = useState(null);
 
