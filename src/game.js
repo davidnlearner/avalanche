@@ -154,7 +154,7 @@ function update() {
             fontSize: "32px",
             fill: "#000",
         });
-        text.depth = 0;
+        text.depth = 100;
 
         const restartText = this.add.text(
             300,
@@ -165,7 +165,7 @@ function update() {
                 fill: "#000",
             }
         );
-        restartText.depth = 0;
+        restartText.depth = 100;
 
         this.input.on(
             "pointerdown",
