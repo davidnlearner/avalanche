@@ -51,6 +51,11 @@ function preload() {
         frameWidth: 32,
         frameHeight: 48,
     });
+
+    this.load.spritesheet("button", "assets/button_sprite_sheet.png", {
+        frameWidth: 193,
+        frameHeight: 71,
+    });
 }
 
 function create() {
@@ -146,11 +151,37 @@ function update() {
     }
 
     if (gameOver) {
-        this.add.text(200, 300 - screenYOffset, gameOverText, {
+        const text = this.add.text(200, 300 - screenYOffset, gameOverText, {
             fontSize: "32px",
             fill: "#000",
         });
-        this.scene.restart();
+        text.depth = 0;
+
+        const restartText = this.add.text(
+            300,
+            400 - screenYOffset,
+            "Restart?",
+            {
+                fontSize: "32px",
+                fill: "#000",
+            }
+        );
+
+        this.input.on(
+            "pointerdown",
+            function (pointer) {
+                const checkX = pointer.x > 300 && pointer.x < 450;
+                const checkY =
+                    pointer.y > 400 - screenYOffset &&
+                    pointer.y > 350 - screenYOffset;
+                if (pointer.leftButtonDown() && checkX && checkY) {
+                    restartGame(this);
+                }
+            },
+            this
+        );
+
+        //this.scene.pause();
         return;
     } else {
         screenYOffset += 0.1;
@@ -268,4 +299,8 @@ function addSkyTile(scene, offset) {
     if (offset % 6000 === 0) {
         image.flipY = true;
     }
+}
+
+function restartGame(scene) {
+    scene.scene.restart();
 }
