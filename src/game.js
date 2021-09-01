@@ -11,7 +11,8 @@ export const initGame = ({ gameWindow, height, width }) => {
             default: "arcade",
             arcade: {
                 gravity: { y: 300 },
-                debug: false,
+                debug: true,
+                fps: 100,
             },
         },
         scene: {
@@ -126,7 +127,7 @@ function create() {
     this.physics.add.collider(crates, platforms);
 
     this.physics.add.collider(player, crates);
-    this.physics.add.collider(crates, crates);
+    this.physics.add.collider(crates, crates, stopGravity, null, this);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
@@ -209,6 +210,18 @@ function playerGameOver() {
     console.log("game over");
     gameOver = true;
     alert("You lost, game over!");
+}
+
+function stopGravity(crate1, crate2) {
+    var b1 = crate1.body;
+    var b2 = crate2.body;
+    if (b1.y > b2.y) {
+        b2.y += b1.top - b2.bottom;
+        b2.stop();
+    } else {
+        b1.y += b2.top - b1.bottom;
+        b1.stop();
+    }
 }
 
 function collectStar(player, star) {
