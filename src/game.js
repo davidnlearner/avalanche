@@ -37,7 +37,7 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
-let gameOverText = "Game Over";
+let gameOverText = "    Game Over";
 
 let screenYOffset = 0;
 const topOffset = 100;
@@ -302,5 +302,11 @@ function addSkyTile(scene, offset) {
 }
 
 function restartGame(scene) {
+    gameOver = false;
+    score = 0;
+    spawnTimer = 0;
+    gameOverText = "    Game Over";
+
+    screenYOffset = 0;
     scene.scene.restart();
 }
