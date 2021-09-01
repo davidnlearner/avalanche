@@ -30,8 +30,6 @@ var player;
 var stars;
 var platforms;
 let background;
-let midground;
-let foreground;
 let crates;
 var cursors;
 var gameStart = false;
@@ -39,6 +37,7 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
+let gameOverText = "Game Over";
 
 let screenYOffset = 0;
 const topOffset = 100;
@@ -142,10 +141,16 @@ function update() {
         this.cameras.main.height + this.cameras.main.scrollY
     ) {
         playerGameOver(this);
+        //need to adjust game over text to center
         //scoreText.y = 16 - screenYOffset;
     }
 
     if (gameOver) {
+        this.add.text(200, 300 - screenYOffset, gameOverText, {
+            fontSize: "32px",
+            fill: "#000",
+        });
+        this.scene.restart();
         return;
     } else {
         screenYOffset += 0.1;
@@ -210,16 +215,7 @@ function spawnCrate(screenY) {
         )
         .setScale(scale)
         .setPushable(false);
-    crate.depth = 10;
-}
-
-function playerGameOver(scene) {
-    console.log("game over");
-    gameOver = true;
-    scene.add.text(400, 300, "Gameover", {
-        fontSize: "32px",
-        fill: "#000",
-    });
+    crate.depth = 50;
 }
 
 function stopGravity(crate1, crate2) {
@@ -234,14 +230,16 @@ function stopGravity(crate1, crate2) {
     }
 }
 
+function playerGameOver(scene) {
+    console.log("game over");
+    gameOver = true;
+}
+
 function checkGameOver(player, crate) {
     if (crate.body.bottom === player.body.top && crate.body.speed > 10) {
         console.log("crushed");
         gameOver = true;
-        this.add.text(400, 300, "Gameover", {
-            fontSize: "32px",
-            fill: "#000",
-        });
+        gameOverText = "     Game Over: \nYou've been crushed";
     }
 }
 
