@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-import Phaser from "phaser";
 
 import { initGame } from "./game.js";
 
@@ -8,6 +7,7 @@ function App() {
 
     const [height, setHeight] = useState(6400);
     const [width, setWidth] = useState(800);
+    // eslint-disable-next-line no-unused-vars
     const [game, setGame] = useState(null);
 
     useEffect(() => {
@@ -17,6 +17,7 @@ function App() {
             setHeight(window.innerHeight);
             setWidth(window.innerWidth);
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /*

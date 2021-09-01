@@ -27,12 +27,11 @@ export const initGame = ({ gameWindow, height, width }) => {
 };
 
 var player;
-var stars;
+//var stars;
 var platforms;
 let background;
 let crates;
 var cursors;
-var gameStart = false;
 var gameOver = false;
 var scoreText;
 let score = 0;
@@ -166,6 +165,7 @@ function update() {
                 fill: "#000",
             }
         );
+        restartText.depth = 0;
 
         this.input.on(
             "pointerdown",
@@ -274,25 +274,25 @@ function checkGameOver(player, crate) {
     }
 }
 
-function collectStar(player, star) {
-    star.disableBody(true, true);
+// function collectStar(player, star) {
+//     star.disableBody(true, true);
 
-    //  Add and update the score
-    score += 10;
-    scoreText.setText("Score: " + score);
+//     //  Add and update the score
+//     score += 10;
+//     scoreText.setText("Score: " + score);
 
-    if (stars.countActive(true) === 0) {
-        //  A new batch of stars to collect
-        stars.children.iterate(function (child) {
-            child.enableBody(true, child.x, 0, true, true);
-        });
+//     if (stars.countActive(true) === 0) {
+//         //  A new batch of stars to collect
+//         stars.children.iterate(function (child) {
+//             child.enableBody(true, child.x, 0, true, true);
+//         });
 
-        var x =
-            player.x < 400
-                ? Phaser.Math.Between(400, 800)
-                : Phaser.Math.Between(0, 400);
-    }
-}
+//         var x =
+//             player.x < 400
+//                 ? Phaser.Math.Between(400, 800)
+//                 : Phaser.Math.Between(0, 400);
+//     }
+// }
 
 function addSkyTile(scene, offset) {
     const image = background.create(400, -(600 + offset), "sky");
