@@ -29,6 +29,9 @@ export const initGame = ({ gameWindow, height, width }) => {
 var player;
 var stars;
 var platforms;
+let background;
+let midground;
+let foreground;
 let crates;
 var cursors;
 var gameStart = false;
@@ -59,9 +62,12 @@ function create() {
         .setBounds(0, 0, 800, 600)
         .setName("main");
 
+    background = this.physics.add.staticGroup();
+    background.depth = 0;
+
     //  A simple background for our game
-    this.add.image(400, 300, "sky");
-    const secondImage = this.add.image(400, -300, "sky");
+    background.create(400, 300, "sky");
+    const secondImage = background.create(400, -300, "sky");
     secondImage.flipY = true;
 
     //  The platforms group contains the ground
@@ -76,6 +82,7 @@ function create() {
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, "dude");
+    player.depth = 90;
 
     player.setCollideWorldBounds(true); //player cannot walk outside window
 
@@ -115,6 +122,7 @@ function create() {
         fontSize: "32px",
         fill: "#000",
     });
+    scoreText.depth = 100;
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
@@ -158,16 +166,15 @@ function update() {
 
         scoreText.y = 16 - screenYOffset;
         score += 0.1;
+        spawnTimer += 1;
 
-        if (spawnTimer === 200) {
-            spawnTimer = 0;
+        if (spawnTimer % 200 === 0) {
             spawnCrate(-screenYOffset);
-        } else {
-            spawnTimer += 1;
         }
 
-        if (spawnTimer % 1000 === 0) {
-            // addSkyTile(screenYOffset)
+        if (spawnTimer !== 0 && spawnTimer % 3000 === 0) {
+            console.log(spawnTimer);
+            addSkyTile(this, screenYOffset);
         }
 
         scoreText.setText("Score: " + Math.round(score));
@@ -195,7 +202,7 @@ function spawnCrate(screenY) {
     const scale = Phaser.Math.FloatBetween(0.1, 0.35);
     const crateWidth = 512 * scale;
 
-    crates
+    const crate = crates
         .create(
             Phaser.Math.Between(crateWidth / 2, 800 - crateWidth / 2),
             screenY - crateWidth / 2,
@@ -203,6 +210,7 @@ function spawnCrate(screenY) {
         )
         .setScale(scale)
         .setPushable(false);
+    crate.depth = 10;
 }
 
 function playerGameOver(scene) {
@@ -254,5 +262,12 @@ function collectStar(player, star) {
             player.x < 400
                 ? Phaser.Math.Between(400, 800)
                 : Phaser.Math.Between(0, 400);
+    }
+}
+
+function addSkyTile(scene, offset) {
+    const image = background.create(400, -(600 + offset), "sky");
+    if (offset % 6000 === 0) {
+        image.flipY = true;
     }
 }
