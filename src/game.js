@@ -6,6 +6,7 @@ export const initGame = ({ gameWindow, height, width }) => {
         canvas: gameWindow.current,
         width,
         height,
+        transparent: true,
         physics: {
             default: "arcade",
             arcade: {
@@ -34,7 +35,9 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
-let screenY = 0;
+
+let screenYOffset = 0;
+const topOffset = 100;
 
 function preload() {
     this.load.image("sky", "assets/sky.png");
@@ -48,27 +51,26 @@ function preload() {
 }
 
 function create() {
-    this.physics.world.setBounds(0, -1000, 800, 1600);
+    this.physics.world.setBounds(0, 0, 800, 600);
 
     this.cameras.main
         .setViewport(0, 0, 800, 600)
-        .setBounds(0, 0, 800, 6400)
+        .setBounds(0, 0, 800, 600)
         .setName("main");
 
     //  A simple background for our game
     this.add.image(400, 300, "sky");
+    const secondImage = this.add.image(400, -300, "sky");
+    secondImage.flipY = true;
 
-    //  The platforms group contains the ground and the 2 ledges we can jump on
+    //  The platforms group contains the ground
     platforms = this.physics.add.staticGroup();
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
     platforms.create(400, 550, "ground").setScale(2).refreshBody();
 
-    //  Now let's create some ledges
-    //platforms.create(600, 400, "ground");
-    //platforms.create(50, 250, "ground");
-
+    // group for falling crates
     crates = this.physics.add.group();
 
     // The player and its settings
@@ -113,7 +115,7 @@ function create() {
     });
 
     //  The score
-    scoreText = this.add.text(16, 16, "score: 0", {
+    scoreText = this.add.text(16, 16, "Score: 0", {
         fontSize: "32px",
         fill: "#000",
     });
@@ -128,44 +130,85 @@ function create() {
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
-
-    this.cameras.main.startFollow(player);
-    console.log(this.physics.world);
 }
 
 function update() {
-    if (player.body.bottom >= this.cameras.main.height - this.cameras.main.y) {
+    if (
+        player.body.bottom >=
+        this.cameras.main.height + this.cameras.main.scrollY
+    ) {
         playerGameOver();
         return;
     } else {
-        screenY += 0.1;
-        //this.cameras.main.y = screenY;
-        //this.physics.world.setBounds(0, -screenY, 800, 800);
+        screenYOffset += 0.1;
+
+        this.physics.world.setBounds(
+            0,
+            -screenYOffset - topOffset,
+            800,
+            600 + screenYOffset + topOffset
+        );
+        this.cameras.main.setBounds(
+            0,
+            -screenYOffset,
+            800,
+            600 + screenYOffset
+        );
+        this.cameras.main.setScroll(0, -screenYOffset);
+
+        scoreText.y = 16 - screenYOffset;
+        score += 0.1;
 
         if (spawnTimer === 200) {
             spawnTimer = 0;
-            spawnCrate(-screenY);
+            spawnCrate(-screenYOffset);
         } else {
             spawnTimer += 1;
         }
+
+        if (spawnTimer % 1000 === 0) {
+            // addSkyTile(screenYOffset)
+        }
+
+        scoreText.setText("Score: " + Math.round(score));
+
+        if (cursors.left.isDown) {
+            player.setVelocityX(-160);
+            player.anims.play("left", true);
+        } else if (cursors.right.isDown) {
+            player.setVelocityX(160);
+            player.anims.play("right", true);
+        } else {
+            player.setVelocityX(0);
+            player.anims.play("turn");
+        }
+        if (cursors.up.isDown && player.body.touching.down) {
+            player.setVelocityY(-330);
+        }
     }
+}
 
-    if (cursors.left.isDown) {
-        player.setVelocityX(-160);
+function spawnCrate(screenY) {
+    // will need to give gravity and random scaling
+    // need to reduce max x value by box size (post scaling)
+    //base width is 512
+    const scale = Phaser.Math.FloatBetween(0.1, 0.35);
+    const crateWidth = 512 * scale;
 
-        player.anims.play("left", true);
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(160);
+    crates
+        .create(
+            Phaser.Math.Between(crateWidth / 2, 800 - crateWidth / 2),
+            screenY - crateWidth / 2,
+            "crate"
+        )
+        .setScale(scale)
+        .setPushable(false);
+}
 
-        player.anims.play("right", true);
-    } else {
-        player.setVelocityX(0);
-
-        player.anims.play("turn");
-    }
-    if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-330);
-    }
+function playerGameOver() {
+    console.log("game over");
+    gameOver = true;
+    alert("You lost, game over!");
 }
 
 function collectStar(player, star) {
@@ -186,27 +229,4 @@ function collectStar(player, star) {
                 ? Phaser.Math.Between(400, 800)
                 : Phaser.Math.Between(0, 400);
     }
-}
-
-function spawnCrate(screenY) {
-    // will need to give gravity and random scaling
-    // need to reduce max x value by box size (post scaling)
-    //base width is 512
-    const scale = Phaser.Math.FloatBetween(0.1, 0.4);
-    const crateWidth = 512 * scale;
-
-    crates
-        .create(
-            Phaser.Math.Between(crateWidth / 2, 800 - crateWidth / 2),
-            screenY,
-            "crate"
-        )
-        .setScale(scale)
-        .setPushable(false);
-}
-
-function playerGameOver() {
-    console.log("game over");
-    gameOver = true;
-    alert("You lost, game over!");
 }
