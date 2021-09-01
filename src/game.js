@@ -11,7 +11,7 @@ export const initGame = ({ gameWindow, height, width }) => {
             default: "arcade",
             arcade: {
                 gravity: { y: 300 },
-                debug: true,
+                debug: false,
                 fps: 100,
             },
         },
@@ -104,16 +104,11 @@ function create() {
     cursors = this.input.keyboard.createCursorKeys();
 
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-        key: "star",
-        repeat: 11,
-        setXY: { x: 12, y: 0, stepX: 70 },
-    });
-
-    stars.children.iterate(function (child) {
-        //  Give each star a slightly different bounce
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    });
+    // stars = this.physics.add.group({
+    //     key: "star",
+    //     repeat: 11,
+    //     setXY: { x: 12, y: 0, stepX: 70 },
+    // });
 
     //  The score
     scoreText = this.add.text(16, 16, "Score: 0", {
@@ -123,14 +118,14 @@ function create() {
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
     this.physics.add.collider(crates, platforms);
 
-    this.physics.add.collider(player, crates);
+    this.physics.add.collider(player, crates, checkGameOver, null, this);
     this.physics.add.collider(crates, crates, stopGravity, null, this);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    this.physics.add.overlap(player, stars, collectStar, null, this);
+    //this.physics.add.collider(stars, platforms);
+    //this.physics.add.overlap(player, stars, collectStar, null, this);
 }
 
 function update() {
@@ -138,7 +133,11 @@ function update() {
         player.body.bottom >=
         this.cameras.main.height + this.cameras.main.scrollY
     ) {
-        playerGameOver();
+        playerGameOver(this);
+        //scoreText.y = 16 - screenYOffset;
+    }
+
+    if (gameOver) {
         return;
     } else {
         screenYOffset += 0.1;
@@ -206,10 +205,13 @@ function spawnCrate(screenY) {
         .setPushable(false);
 }
 
-function playerGameOver() {
+function playerGameOver(scene) {
     console.log("game over");
     gameOver = true;
-    alert("You lost, game over!");
+    scene.add.text(400, 300, "Gameover", {
+        fontSize: "32px",
+        fill: "#000",
+    });
 }
 
 function stopGravity(crate1, crate2) {
@@ -221,6 +223,17 @@ function stopGravity(crate1, crate2) {
     } else {
         b1.y += b2.top - b1.bottom;
         b1.stop();
+    }
+}
+
+function checkGameOver(player, crate) {
+    if (crate.body.bottom === player.body.top && crate.body.speed > 10) {
+        console.log("crushed");
+        gameOver = true;
+        this.add.text(400, 300, "Gameover", {
+            fontSize: "32px",
+            fill: "#000",
+        });
     }
 }
 
