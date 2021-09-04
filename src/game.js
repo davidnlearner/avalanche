@@ -26,10 +26,11 @@ export const initGame = ({ gameWindow, height, width }) => {
     return game;
 };
 
-var player;
+let player;
 //var stars;
 var platforms;
 let background;
+let lava;
 let crates;
 var cursors;
 var gameOver = false;
@@ -134,19 +135,25 @@ function create() {
     this.physics.add.collider(player, crates, checkGameOver, null, this);
     this.physics.add.collider(crates, crates, stopGravity, null, this);
 
+    lava = this.add.rectangle(400, 800, 800, 100, 0xff0000, 0.25);
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     //this.physics.add.collider(stars, platforms);
     //this.physics.add.overlap(player, stars, collectStar, null, this);
+
+    this.cameras.main.startFollow(player);
+    this.cameras.main.followOffset.set(0, 200);
 }
 
 function update() {
-    if (
-        player.body.bottom >=
-        this.cameras.main.height + this.cameras.main.scrollY
-    ) {
+    // if (
+    //     player.body.bottom >=
+    //     this.cameras.main.height + this.cameras.main.scrollY
+    // ) {
+    //     playerGameOver(this);
+    // }
+
+    if (player.body.bottom >= lava.y - player.height) {
         playerGameOver(this);
-        //need to adjust game over text to center
-        //scoreText.y = 16 - screenYOffset;
     }
 
     if (gameOver) {
@@ -181,10 +188,17 @@ function update() {
             this
         );
 
-        //this.scene.pause();
+        player.setVelocityX(0);
+        player.anims.stop();
+
         return;
     } else {
-        screenYOffset += 0.1;
+        //screenYOffset += 0.1;
+        screenYOffset = 500 - player.y;
+        console.log(screenYOffset);
+
+        lava.height += 0.1;
+        lava.y -= 0.1;
 
         this.physics.world.setBounds(
             0,
@@ -192,13 +206,14 @@ function update() {
             800,
             600 + screenYOffset + topOffset
         );
+
         this.cameras.main.setBounds(
             0,
             -screenYOffset,
             800,
             600 + screenYOffset
         );
-        this.cameras.main.setScroll(0, -screenYOffset);
+        // this.cameras.main.setScroll(0, -screenYOffset);
 
         scoreText.y = 16 - screenYOffset;
         score += 0.1;
@@ -208,8 +223,10 @@ function update() {
             spawnCrate(-screenYOffset);
         }
 
-        if (spawnTimer !== 0 && spawnTimer % 3000 === 0) {
-            console.log(spawnTimer);
+        if (screenYOffset !== 0 && screenYOffset % 600 === 0) {
+            //console.log(screenYOffset);
+            //Doesn't work because player y isn't going to give round numbers
+
             addSkyTile(this, screenYOffset);
         }
 

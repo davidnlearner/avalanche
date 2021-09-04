@@ -5,7 +5,7 @@ import { initGame } from "./game.js";
 function App() {
     const gameWindow = useRef(null);
 
-    const [height, setHeight] = useState(6400);
+    const [height, setHeight] = useState(800);
     const [width, setWidth] = useState(800);
     // eslint-disable-next-line no-unused-vars
     const [game, setGame] = useState(null);
