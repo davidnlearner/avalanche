@@ -30,6 +30,7 @@ let player;
 //var stars;
 var platforms;
 let background;
+let backgroundSpawnHeight = 300;
 let lava;
 let crates;
 var cursors;
@@ -197,8 +198,8 @@ function update() {
         screenYOffset = 500 - player.y;
         console.log(screenYOffset);
 
-        lava.height += 0.1;
-        lava.y -= 0.1;
+        lava.height += 0.2;
+        lava.y -= 0.2;
 
         this.physics.world.setBounds(
             0,
@@ -223,11 +224,9 @@ function update() {
             spawnCrate(-screenYOffset);
         }
 
-        if (screenYOffset !== 0 && screenYOffset % 600 === 0) {
-            //console.log(screenYOffset);
-            //Doesn't work because player y isn't going to give round numbers
-
-            addSkyTile(this, screenYOffset);
+        if (screenYOffset >= backgroundSpawnHeight) {
+            addSkyTile(this, backgroundSpawnHeight);
+            backgroundSpawnHeight += 600;
         }
 
         scoreText.setText("Score: " + Math.round(score));
@@ -313,7 +312,7 @@ function checkGameOver(player, crate) {
 
 function addSkyTile(scene, offset) {
     const image = background.create(400, -(600 + offset), "sky");
-    if (offset % 6000 === 0) {
+    if ((offset - 300) % 1200 !== 0) {
         image.flipY = true;
     }
 }
