@@ -38,14 +38,14 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
-let gameOverText = "    Game Over";
+let gameOverText = "     Game Over: \nThe lava caught up.";
 
 let screenYOffset = 0;
 const topOffset = 100;
 
 function preload() {
     this.load.image("sky", "assets/sky.png");
-    this.load.image("ground", "assets/platform.png");
+    this.load.image("ground", "assets/ground.png");
     this.load.image("star", "assets/star.png");
     this.load.image("crate", "assets/crate.png");
     this.load.spritesheet("dude", "assets/dude.png", {
@@ -79,14 +79,13 @@ function create() {
     platforms = this.physics.add.staticGroup();
 
     //  Here we create the ground.
-    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 550, "ground").setScale(2).refreshBody();
+    platforms.create(400, 500, "ground").refreshBody();
 
     // group for falling crates
     crates = this.physics.add.group();
 
     // The player and its settings
-    player = this.physics.add.sprite(100, 450, "dude");
+    player = this.physics.add.sprite(350, 425, "dude");
     player.depth = 90;
 
     player.setCollideWorldBounds(true); //player cannot walk outside window
@@ -196,7 +195,6 @@ function update() {
     } else {
         //screenYOffset += 0.1;
         screenYOffset = 500 - player.y;
-        console.log(screenYOffset);
 
         lava.height += 0.2;
         lava.y -= 0.2;
@@ -214,7 +212,6 @@ function update() {
             800,
             600 + screenYOffset
         );
-        // this.cameras.main.setScroll(0, -screenYOffset);
 
         scoreText.y = 16 - screenYOffset;
         score += 0.1;
@@ -284,7 +281,6 @@ function playerGameOver(scene) {
 
 function checkGameOver(player, crate) {
     if (crate.body.bottom === player.body.top && crate.body.speed > 10) {
-        console.log("crushed");
         gameOver = true;
         gameOverText = "     Game Over: \nYou've been crushed";
     }
@@ -322,6 +318,7 @@ function restartGame(scene) {
     score = 0;
     spawnTimer = 0;
     gameOverText = "    Game Over";
+    backgroundSpawnHeight = 300;
 
     screenYOffset = 0;
     scene.scene.restart();
