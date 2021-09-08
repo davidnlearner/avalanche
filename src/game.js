@@ -88,7 +88,7 @@ function create() {
     player = this.physics.add.sprite(350, 425, "dude");
     player.depth = 90;
 
-    player.setCollideWorldBounds(true); //player cannot walk outside window
+    //player.setCollideWorldBounds(true); //player cannot walk outside window
 
     //  Our player animations, turning, walking left and walking right.
     this.anims.create({
@@ -145,12 +145,11 @@ function create() {
 }
 
 function update() {
-    // if (
-    //     player.body.bottom >=
-    //     this.cameras.main.height + this.cameras.main.scrollY
-    // ) {
-    //     playerGameOver(this);
-    // }
+    if (player.x > this.cameras.main.width) {
+        player.x = 0;
+    } else if (player.x < 0) {
+        player.x = this.cameras.main.width;
+    }
 
     if (player.body.bottom >= lava.y - player.height) {
         playerGameOver(this);
