@@ -1,3 +1,5 @@
+# Avalanche
+
 A 2D arcade game, where you try to platform up a tower of crates to avoid the climbing lava. Control your character using the arrow keys.
 Based on [this flash game](https://www.addictinggames.com/action/avalanche) of the same name.
 
