@@ -6,6 +6,7 @@ export default function Instructions() {
                 jumping on the ever increasing tower of crates, but don't get
                 hit.
             </div>
+            <br />
             <div>Use the arrow keys to move and jump.</div>
         </div>
     );

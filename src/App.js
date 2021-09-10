@@ -30,6 +30,7 @@ function App() {
                 <canvas ref={gameWindow} className="game-window"></canvas>
             </div>
             <Instructions />
+            <hr />
             <Footer />
         </div>
     );
