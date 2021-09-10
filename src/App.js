@@ -1,6 +1,9 @@
 import { useRef, useEffect, useState } from "react";
 
 import { initGame } from "./game.js";
+import Footer from "./components/Footer";
+import Header from "./components/Header.js";
+import Instructions from "./components/Instructions.js";
 
 function App() {
     const gameWindow = useRef(null);
@@ -20,18 +23,14 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    /*
-    useEffect(() => {
-        if (game) {
-            console.log("running ", game);
-            game.scale.resize(width, height);
-        }
-    }, [height, width]);
-    */
-
     return (
         <div className="App">
-            <canvas ref={gameWindow}></canvas>
+            <Header />
+            <div className="game-wrapper">
+                <canvas ref={gameWindow} className="game-window"></canvas>
+            </div>
+            <Instructions />
+            <Footer />
         </div>
     );
 }

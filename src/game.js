@@ -1,31 +1,5 @@
 import Phaser from "phaser";
 
-export const initGame = ({ gameWindow, height, width }) => {
-    const config = {
-        type: Phaser.CANVAS,
-        canvas: gameWindow.current,
-        width,
-        height,
-        transparent: true,
-        physics: {
-            default: "arcade",
-            arcade: {
-                gravity: { y: 300 },
-                debug: false,
-                fps: 100,
-            },
-        },
-        scene: {
-            preload: preload,
-            create: create,
-            update: update,
-        },
-    };
-
-    const game = new Phaser.Game(config);
-    return game;
-};
-
 let player;
 //var stars;
 var platforms;
@@ -38,10 +12,43 @@ var gameOver = false;
 var scoreText;
 let score = 0;
 let spawnTimer = 0;
+let lavaSpeed = 0.1;
+let zoneHeight = 600;
 let gameOverText = "     Game Over: \nThe lava caught up.";
 
 let screenYOffset = 0;
 const topOffset = 100;
+
+export const initGame = ({ gameWindow, height, width }) => {
+    const config = {
+        type: Phaser.CANVAS,
+        canvas: gameWindow.current,
+        width,
+        height,
+        transparent: true,
+        roundPixels: true,
+        physics: {
+            default: "arcade",
+            arcade: {
+                gravity: { y: 300 },
+                debug: false,
+                fps: 100,
+            },
+        },
+        scale: {
+            mode: Phaser.Scale.FIT,
+            //autoCenter: Phaser.Scale.CENTER_BOTH,
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update,
+        },
+    };
+
+    const game = new Phaser.Game(config);
+    return game;
+};
 
 function preload() {
     this.load.image("sky", "assets/sky.png");
@@ -79,13 +86,13 @@ function create() {
     platforms = this.physics.add.staticGroup();
 
     //  Here we create the ground.
-    platforms.create(400, 500, "ground").refreshBody();
+    platforms.create(400, 550, "ground").refreshBody();
 
     // group for falling crates
     crates = this.physics.add.group();
 
     // The player and its settings
-    player = this.physics.add.sprite(350, 425, "dude");
+    player = this.physics.add.sprite(350, 350, "dude");
     player.depth = 90;
 
     //player.setCollideWorldBounds(true); //player cannot walk outside window
@@ -135,13 +142,13 @@ function create() {
     this.physics.add.collider(player, crates, checkGameOver, null, this);
     this.physics.add.collider(crates, crates, stopGravity, null, this);
 
-    lava = this.add.rectangle(400, 800, 800, 100, 0xff0000, 0.25);
+    lava = this.add.rectangle(400, 650, 800, 50, 0xff0000, 0.25);
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     //this.physics.add.collider(stars, platforms);
     //this.physics.add.overlap(player, stars, collectStar, null, this);
 
     this.cameras.main.startFollow(player);
-    this.cameras.main.followOffset.set(0, 200);
+    this.cameras.main.followOffset.set(0, 100);
 }
 
 function update() {
@@ -152,25 +159,27 @@ function update() {
     }
 
     if (player.body.bottom >= lava.y - player.height) {
-        playerGameOver(this);
+        gameOver = true;
     }
 
     if (gameOver) {
+        this.cameras.main.stopFollow();
+
         const text = this.add.text(200, 300 - screenYOffset, gameOverText, {
             fontSize: "32px",
             fill: "#000",
         });
         text.depth = 100;
 
-        const restartText = this.add.text(
-            300,
-            400 - screenYOffset,
-            "Restart?",
-            {
+        const restartText = this.add
+            .text(300, 400 - screenYOffset, "Restart?", {
                 fontSize: "32px",
                 fill: "#000",
-            }
-        );
+                backgroundColor: "#fff",
+            })
+            .setPadding(5)
+            .setInteractive({ useHandCursor: true });
+
         restartText.depth = 100;
 
         this.input.on(
@@ -192,11 +201,16 @@ function update() {
 
         return;
     } else {
-        //screenYOffset += 0.1;
         screenYOffset = 500 - player.y;
 
-        lava.height += 0.2;
-        lava.y -= 0.2;
+        lava.height += lavaSpeed;
+        lava.y -= lavaSpeed;
+
+        //first zone is the ground at 600,
+        if (lava.y < zoneHeight) {
+            lavaSpeed += 0.1;
+            zoneHeight -= 2000;
+        }
 
         this.physics.world.setBounds(
             0,
@@ -212,7 +226,7 @@ function update() {
             600 + screenYOffset
         );
 
-        scoreText.y = 16 - screenYOffset;
+        scoreText.y = this.cameras.main._bounds.top + 120;
         score += 0.1;
         spawnTimer += 1;
 
@@ -273,11 +287,6 @@ function stopGravity(crate1, crate2) {
     }
 }
 
-function playerGameOver(scene) {
-    console.log("game over");
-    gameOver = true;
-}
-
 function checkGameOver(player, crate) {
     if (crate.body.bottom === player.body.top && crate.body.speed > 10) {
         gameOver = true;
@@ -312,13 +321,15 @@ function addSkyTile(scene, offset) {
     }
 }
 
-function restartGame(scene) {
+export function restartGame(scene) {
+    console.log(scene);
     gameOver = false;
     score = 0;
     spawnTimer = 0;
-    gameOverText = "    Game Over";
+    gameOverText = "     Game Over: \nThe lava caught up.";
     backgroundSpawnHeight = 300;
-
     screenYOffset = 0;
+    lavaSpeed = 0.1;
+
     scene.scene.restart();
 }

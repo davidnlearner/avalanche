@@ -1,13 +1,57 @@
+@font-face {
+    font-family: ArcadeFont;
+    src: url("fonts/ARCADE_I.ttf") format("truetype");
+}
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    background-color: rgb(43, 43, 43);
+    color: white;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
+}
+
+.App {
+    margin: 0 2rem;
+    text-align: center;
+}
+
+.game-wrapper {
+    width: 70%;
+    max-width: 800px;
+    margin-top: 2rem;
+    margin: auto;
+}
+
+.header {
+    text-align: center;
+}
+
+.header-title {
+    font-family: "ArcadeFont";
+    font-size: 3rem;
+}
+
+.instructions {
+    border-radius: 10px;
+    margin: auto;
+    background-color: rgba(90, 90, 90, 0.5);
+    line-height: 1.5;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    width: 70%;
+    max-width: 800px;
+}
+
+a {
+    color: lightblue;
 }
